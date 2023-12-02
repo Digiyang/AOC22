@@ -23,25 +23,36 @@ fn main() -> Result<(), anyhow::Error> {
     let mut input = File::open("puzzle_input.txt")?;
     let mut output = String::new();
     input.read_to_string(&mut output)?;
+
+    /* 
+    let input = "
+    Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green
+    Game 2: 1 blue, 2 green; 3 green, 4 blue, 1 red; 1 green, 1 blue
+    Game 3: 8 green, 6 blue, 20 red; 5 blue, 4 red, 13 green; 5 green, 1 red
+    Game 4: 1 green, 3 red, 6 blue; 3 green, 6 red; 3 green, 15 blue, 14 red
+    Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green
+    "; 
+    */
+
     // Process the input data
     let games: Vec<Game> = output.lines().filter_map(|line| parse_game(line)).collect();
     let mut count = 0;
 
     for game in games {
-        let mut all_sets_satisfy_conditions = true;
+        let mut max_count = Set {
+            red: 0,
+            green: 0,
+            blue: 0,
+        };
 
         for set in &game.sets {
-            if set.red > 12 || set.green > 13 || set.blue > 14 {
-                all_sets_satisfy_conditions = false;
-                break; // No need to check other sets in this game if one set doesn't satisfy the conditions
-            }
+            max_count.red = max_count.red.max(set.red);
+            max_count.green = max_count.green.max(set.green);
+            max_count.blue = max_count.blue.max(set.blue);
         }
-
-        if all_sets_satisfy_conditions {
-            count += game.game_number;
-        }
+        count += max_count.red * max_count.green * max_count.blue;
+        //println!("Game Number: {} | Max: {:?}", game.game_number, max_count);
     }
-
     println!("Total: {}", count);
 
     Ok(())
